@@ -24,28 +24,11 @@ void setup()
 {
   Serial1.begin(38400);
   Serial.begin(38400);
-  pinMode(6, OUTPUT);
-  pinMode(7, OUTPUT);
   pinMode(8, OUTPUT);
 }
 
-void loop() {
-  float reading = analogRead(ADC_BATTERY);
-  float voltage = reading * (3.7 / 1023.0);
-
-  digitalWrite(7, LOW);
-  if (voltage > 3.2)
-  {
-    digitalWrite(8, HIGH); 
-  }
-  else if (voltage < .5)
-  {
-    digitalWrite(8, LOW);
-    while (voltage < .5)
-    {
-      digitalWrite(7, HIGH); 
-    }
-  }
+void loop() { 
+  digitalWrite(8, LOW);
   
   //read finger values and shift 2 to the right to change max from 1024 to 127
   //from arduino values to MIDI values
@@ -104,12 +87,11 @@ void loop() {
     {
       mod = 484 - level;
     }
-    Serial.print(level);
-    Serial.print("\n");
+    
     sendNote(cmd, 0, mod);
   }
 
-  //if not has been changed play new note
+  //if note has been changed play new note
   if (lastGray != grayCode)
   {
     //if high finger on set the constat to 12, each MIDI note is equal to the same note an octave lower plus 12
@@ -234,7 +216,8 @@ void loop() {
     else
     {
       //turns off connected LED if data being recieved on the HC-06 is -1(non-connect signal)
-      digitalWrite(6, LOW);
+      digitalWrite(8, LOW);
+      turnoffNote();
     }
   }
 
@@ -258,10 +241,7 @@ void turnoffNote()
   int noteoff = 48;
   while (noteoff < 85)
   {
-    Serial1.write(0x80);
-    Serial1.write(noteoff);
-    Serial1.write(127);
-
+    sendNote(0x80,noteoff,127);
     noteoff++;
   }
 }
