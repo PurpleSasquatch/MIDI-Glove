@@ -75,15 +75,15 @@ void loop() {
     //the first if loop gives a buffer zone for unintended movement
     //the other if statements change the value to a range from 0 to 127
 
-    if (level < 494 && level > 474)
+    if (level < 510 && level > 460)
     {
       mod = 0;
     }
-    else if (level > 494 && level < 620)
+    else if (level > 510 && level < 646)
     {
       mod = level - 484;
     }
-    else if (level < 474 && level > 348);
+    else if (level < 460 && level > 334);
     {
       mod = 484 - level;
     }
@@ -110,7 +110,7 @@ void loop() {
     cmd = 0x90;
     if (Serial1.read() != -1)
     {
-      digitalWrite(6, HIGH);//blue Led means connected
+      digitalWrite(8, HIGH);//blue Led means connected
 
       //updates lastgray
       lastGray = grayCode;
@@ -187,7 +187,7 @@ void loop() {
             break;
 
           case 3:
-            note = noteconst + 64;
+            note = noteconst + 63;
             sendNote(cmd, note, 127);
             break;
 
@@ -202,12 +202,12 @@ void loop() {
             break;
 
           case 6:
-            note = noteconst + 69;
+            note = noteconst + 68;
             sendNote(cmd, note, 127);
             break;
 
           case 7:
-            note = noteconst + 71;
+            note = noteconst + 70;
             sendNote(cmd, note, 127);
             break;
         }
@@ -216,7 +216,6 @@ void loop() {
     else
     {
       //turns off connected LED if data being recieved on the HC-06 is -1(non-connect signal)
-      digitalWrite(8, LOW);
       turnoffNote();
     }
   }
@@ -298,42 +297,42 @@ void sendChord(String chord, int noteconst)
   {
     case 1:
       sendNote(0x90, 48 + noteconst, 127);
-      sendNote(0x90, 52 + noteconst, 127);
+      sendNote(0x90, 51 + noteconst, 127);
       sendNote(0x90, 55 + noteconst, 127);
       break;
 
     case 2:
       sendNote(0x90, 50 + noteconst, 127);
       sendNote(0x90, 53 + noteconst, 127);
-      sendNote(0x90, 57 + noteconst, 127);
+      sendNote(0x90, 56 + noteconst, 127);
       break;
 
     case 3:
-      sendNote(0x90, 52 + noteconst, 127);
+      sendNote(0x90, 51 + noteconst, 127);
       sendNote(0x90, 55 + noteconst, 127);
-      sendNote(0x90, 59 + noteconst, 127);
+      sendNote(0x90, 58 + noteconst, 127);
       break;
 
     case 4:
       sendNote(0x90, 53 + noteconst, 127);
-      sendNote(0x90, 57 + noteconst, 127);
+      sendNote(0x90, 56 + noteconst, 127);
       sendNote(0x90, 60 + noteconst, 127);
       break;
 
     case 5:
       sendNote(0x90, 55 + noteconst, 127);
-      sendNote(0x90, 59 + noteconst, 127);
+      sendNote(0x90, 58 + noteconst, 127);
       sendNote(0x90, 62 + noteconst, 127);
       break;
 
     case 6:
-      sendNote(0x90, 57 + noteconst, 127);
+      sendNote(0x90, 56 + noteconst, 127);
       sendNote(0x90, 60 + noteconst, 127);
-      sendNote(0x90, 64 + noteconst, 127);
+      sendNote(0x90, 63 + noteconst, 127);
       break;
 
     case 7:
-      sendNote(0x90, 59 + noteconst, 127);
+      sendNote(0x90, 58 + noteconst, 127);
       sendNote(0x90, 62 + noteconst, 127);
       sendNote(0x90, 65 + noteconst, 127);
       break;
