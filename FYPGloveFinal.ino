@@ -25,11 +25,13 @@ void setup()
   Serial1.begin(38400);
   Serial.begin(38400);
   pinMode(8, OUTPUT);
+  digitalWrite(8, LOW);
+  pinMode(1, INPUT);
 }
 
-void loop() { 
-  digitalWrite(8, LOW);
-  
+void loop() {
+
+
   //read finger values and shift 2 to the right to change max from 1024 to 127
   //from arduino values to MIDI values
   int middle = analogRead(A2) >> 2;
@@ -43,10 +45,20 @@ void loop() {
   int note = 0;
   int noteconst = 0;
   int cmd = 0;
+  int loudest = 0;
+  int transpose = 0;
 
   //small delay to allow user to press multiple fingers
   delay(25);
 
+  if (digitalRead(1) == HIGH)
+  {
+    transpose = 2;
+  }
+  else
+  {
+    transpose = 0;
+  }
   //set bits for notes and comparisions
   if (middle > 10)
   {
@@ -63,13 +75,12 @@ void loop() {
 
   //combine bit patterns to create the code on which the notes will be played
   int grayCode = bit1 + bit2 + bit3;
-
+  Serial.println(grayCode);
   //checks for a change in notes being played or allows the note to ring out
   if (lastGray == grayCode && grayCode != 0) {
-    cmd = 0xE0;//code for pitch modulation
+
     int level = analogRead(A5);
     int mod = 0;// amount of pitch modulation
-
     //if the wrist flexor is not moved it sends no signal when moved it sends the value to the pitch
     //modulation command
     //the first if loop gives a buffer zone for unintended movement
@@ -78,18 +89,36 @@ void loop() {
     if (level < 510 && level > 460)
     {
       mod = 0;
-    }
-    else if (level > 510 && level < 646)
+    } else if (level > 510 && level < 646)
     {
       mod = level - 484;
-    }
-    else if (level < 460 && level > 334);
+    } else if (level < 460 && level > 334);
     {
       mod = 484 - level;
     }
-    
-    sendNote(cmd, 0, mod);
+
+    sendNote(0xE0, 0, mod);
+    //0xC0 channel pressure command
+    if (middle > ring)
+    {
+      if (middle > pinkie)
+      {
+        loudest = middle;
+      } else
+      {
+        loudest = pinkie;
+      }
+    } else if (ring > pinkie)
+    {
+      loudest = ring;
+    }
   }
+  if (loudest > 10)
+  {
+    Serial1.write(0xC0);
+    Serial1.write(loudest);
+  }
+
 
   //if note has been changed play new note
   if (lastGray != grayCode)
@@ -114,6 +143,7 @@ void loop() {
 
       //updates lastgray
       lastGray = grayCode;
+      Serial.println("last="+lastGray);
       // if Chord Finger on go to case switch structure to play chord
       if (analogRead(A0) > 100)
       {
@@ -131,31 +161,31 @@ void loop() {
             break;
           //calls the sendchord function with the name of each chord
           case 1:
-            sendChord("C", noteconst);
+            sendChord("C", noteconst, transpose);
             break;
 
           case 2:
-            sendChord("D", noteconst);
+            sendChord("D", noteconst, transpose);
             break;
 
           case 3:
-            sendChord("E", noteconst);
+            sendChord("E", noteconst, transpose);
             break;
 
           case 4:
-            sendChord("F", noteconst);
+            sendChord("F", noteconst, transpose);
             break;
 
           case 5:
-            sendChord("G", noteconst);
+            sendChord("G", noteconst, transpose);
             break;
 
           case 6:
-            sendChord("A", noteconst);
+            sendChord("A", noteconst, transpose);
             break;
 
           case 7:
-            sendChord("B", noteconst);
+            sendChord("B", noteconst, transpose);
             break;
         }
       }
@@ -240,7 +270,7 @@ void turnoffNote()
   int noteoff = 48;
   while (noteoff < 85)
   {
-    sendNote(0x80,noteoff,127);
+    sendNote(0x80, noteoff, 127);
     noteoff++;
   }
 }
@@ -249,7 +279,7 @@ void turnoffNote()
 //send chord command sends the three notes associated with a chord based on the integer value
 //assigned to each chord name in the key of C
 ///////////////////////////////////////////////////////////////////////////////////////////////
-void sendChord(String chord, int noteconst)
+void sendChord(String chord, int noteconst, int transpose)
 {
   int chordInt = 0;
   //C Major
@@ -296,45 +326,45 @@ void sendChord(String chord, int noteconst)
   switch (chordInt)
   {
     case 1:
-      sendNote(0x90, 48 + noteconst, 127);
-      sendNote(0x90, 51 + noteconst, 127);
-      sendNote(0x90, 55 + noteconst, 127);
+      sendNote(0x90, 48 + noteconst + transpose, 127);
+      sendNote(0x90, 51 + noteconst + transpose, 127);
+      sendNote(0x90, 55 + noteconst + transpose, 127);
       break;
 
     case 2:
-      sendNote(0x90, 50 + noteconst, 127);
-      sendNote(0x90, 53 + noteconst, 127);
-      sendNote(0x90, 56 + noteconst, 127);
+      sendNote(0x90, 50 + noteconst + transpose, 127);
+      sendNote(0x90, 53 + noteconst + transpose, 127);
+      sendNote(0x90, 56 + noteconst + transpose, 127);
       break;
 
     case 3:
-      sendNote(0x90, 51 + noteconst, 127);
-      sendNote(0x90, 55 + noteconst, 127);
-      sendNote(0x90, 58 + noteconst, 127);
+      sendNote(0x90, 51 + noteconst + transpose, 127);
+      sendNote(0x90, 55 + noteconst + transpose, 127);
+      sendNote(0x90, 58 + noteconst + transpose, 127);
       break;
 
     case 4:
-      sendNote(0x90, 53 + noteconst, 127);
-      sendNote(0x90, 56 + noteconst, 127);
-      sendNote(0x90, 60 + noteconst, 127);
+      sendNote(0x90, 53 + noteconst + transpose, 127);
+      sendNote(0x90, 56 + noteconst + transpose, 127);
+      sendNote(0x90, 60 + noteconst + transpose, 127);
       break;
 
     case 5:
-      sendNote(0x90, 55 + noteconst, 127);
-      sendNote(0x90, 58 + noteconst, 127);
-      sendNote(0x90, 62 + noteconst, 127);
+      sendNote(0x90, 55 + noteconst + transpose, 127);
+      sendNote(0x90, 58 + noteconst + transpose, 127);
+      sendNote(0x90, 62 + noteconst + transpose, 127);
       break;
 
     case 6:
-      sendNote(0x90, 56 + noteconst, 127);
-      sendNote(0x90, 60 + noteconst, 127);
-      sendNote(0x90, 63 + noteconst, 127);
+      sendNote(0x90, 56 + noteconst + transpose, 127);
+      sendNote(0x90, 60 + noteconst + transpose, 127);
+      sendNote(0x90, 63 + noteconst + transpose, 127);
       break;
 
     case 7:
-      sendNote(0x90, 58 + noteconst, 127);
-      sendNote(0x90, 62 + noteconst, 127);
-      sendNote(0x90, 65 + noteconst, 127);
+      sendNote(0x90, 58 + noteconst + transpose, 127);
+      sendNote(0x90, 62 + noteconst + transpose, 127);
+      sendNote(0x90, 65 + noteconst + transpose, 127);
       break;
   }
 }
