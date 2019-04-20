@@ -12,3 +12,5 @@ This project can be run with any synth that takes in a midi channel and changed 
 
 Loop MIDI is used to manage the midi ports and is a required but free programme. This programme also shows the throughput of the midi port which shows if data transfer is taking place.
 
+Interesting thing: Kraftwerk used a nintendo powerglove in some of their live sets as a MIDI synth
+
